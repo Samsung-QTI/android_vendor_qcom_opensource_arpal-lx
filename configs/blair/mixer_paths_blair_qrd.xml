@@ -310,6 +310,21 @@
     <ctl name="SpkrMono WSA_RDAC" value="ZERO" />
     <ctl name="SpkrMono BOOST Switch" value="1" />
 
+    <!-- Fsm controls -->
+    <!-- SmartPA controls -->
+    <ctl name="SPK1 FSAMP DAC_Port Switch" value="0" />
+    <ctl name="SPK2 FSAMP DAC_Port Switch" value="0" />
+    <ctl name="SPK3 FSAMP DAC_Port Switch" value="0" />
+    <ctl name="SPK4 FSAMP DAC_Port Switch" value="0" />
+    <ctl name="SPK1 FSAMP Scene" value="MUSIC" />
+    <ctl name="SPK2 FSAMP Scene" value="MUSIC" />
+    <ctl name="SPK3 FSAMP Scene" value="MUSIC" />
+    <ctl name="SPK4 FSAMP Scene" value="MUSIC" />
+    <ctl name="SPK1 FSAMP Volume" value="1023" />
+    <ctl name="SPK2 FSAMP Volume" value="1023" />
+    <ctl name="SPK3 FSAMP Volume" value="1023" />
+    <ctl name="SPK4 FSAMP Volume" value="1023" />
+
     <!-- RX Controls -->
     <ctl name="RX_MACRO RX0 MUX" value="ZERO" />
     <ctl name="RX_MACRO RX1 MUX" value="ZERO" />
@@ -400,10 +415,10 @@
     <ctl name="HPHR Volume" value="20" />
     <ctl name="EAR SPKR PA Gain" value="G_DEFAULT" />
 
-    <ctl name="TX_DEC0 Volume" value="84" />
-    <ctl name="TX_DEC1 Volume" value="84" />
-    <ctl name="TX_DEC2 Volume" value="84" />
-    <ctl name="TX_DEC3 Volume" value="84" />
+    <ctl name="TX_DEC0 Volume" value="81" />
+    <ctl name="TX_DEC1 Volume" value="81" />
+    <ctl name="TX_DEC2 Volume" value="81" />
+    <ctl name="TX_DEC3 Volume" value="81" />
 
     <ctl name="ADC1 Volume" value="12" />
     <ctl name="ADC2 Volume" value="12" />
@@ -464,6 +479,8 @@
     <ctl name="WSA_RX INT1 VBAT WSA RX1 VBAT Enable" value="0" />
     <ctl name="RX_Softclip Enable" value="0" />
     <ctl name="RX INT2_1 VBAT RX AUX VBAT Enable" value="0" />
+    <ctl name="SWR DAC_Port Switch" value="0" />
+    <ctl name="ADC2_BCS Disable" value="0" />
 
     <!-- Codec controls end -->
 
@@ -2889,12 +2906,87 @@
     </path>
 
     <path name="speaker">
-        <ctl name="RX_CDC_DMA_RX_1 Channels" value="One" />
-        <ctl name="RX_MACRO RX2 MUX" value="AIF2_PB" />
-        <ctl name="RX INT2_1 MIX1 INP0" value="RX2" />
-        <ctl name="AUX_RDAC Switch" value="1" />
-        <ctl name="SpkrMono WSA_RDAC" value="Switch" />
+        <ctl name="SPK1 FSAMP Scene" value="MUSIC" />
+        <ctl name="SPK2 FSAMP Scene" value="MUSIC" />
+        <ctl name="SPK3 FSAMP Scene" value="MUSIC" />
+        <ctl name="SPK4 FSAMP Scene" value="MUSIC" />
+        <ctl name="SPK1 FSAMP DAC_Port Switch" value="1" />
+        <ctl name="SPK2 FSAMP DAC_Port Switch" value="1" />
+        <ctl name="SPK3 FSAMP DAC_Port Switch" value="1" />
+        <ctl name="SPK4 FSAMP DAC_Port Switch" value="1" />
     </path>
+
+    <!-- lux mmitest start -->
+    <path name="speaker-left-top">
+        <ctl name="SPK1 FSAMP Scene" value="MUSIC" />
+        <ctl name="SPK2 FSAMP Scene" value="MUSIC" />
+        <ctl name="SPK3 FSAMP Scene" value="MUSIC" />
+        <ctl name="SPK4 FSAMP Scene" value="MUSIC" />
+        <ctl name="SPK1 FSAMP DAC_Port Switch" value="0" />
+        <ctl name="SPK2 FSAMP DAC_Port Switch" value="1" />
+        <ctl name="SPK3 FSAMP DAC_Port Switch" value="0" />
+        <ctl name="SPK4 FSAMP DAC_Port Switch" value="0" />
+    </path>
+
+    <path name="speaker-left-bottom">
+        <ctl name="SPK1 FSAMP Scene" value="MUSIC" />
+        <ctl name="SPK2 FSAMP Scene" value="MUSIC" />
+        <ctl name="SPK3 FSAMP Scene" value="MUSIC" />
+        <ctl name="SPK4 FSAMP Scene" value="MUSIC" />
+        <ctl name="SPK1 FSAMP DAC_Port Switch" value="0" />
+        <ctl name="SPK2 FSAMP DAC_Port Switch" value="0" />
+        <ctl name="SPK3 FSAMP DAC_Port Switch" value="0" />
+        <ctl name="SPK4 FSAMP DAC_Port Switch" value="1" />
+    </path>
+
+    <path name="speaker-right-top">
+        <ctl name="SPK1 FSAMP Scene" value="MUSIC" />
+        <ctl name="SPK2 FSAMP Scene" value="MUSIC" />
+        <ctl name="SPK3 FSAMP Scene" value="MUSIC" />
+        <ctl name="SPK4 FSAMP Scene" value="MUSIC" />
+        <ctl name="SPK1 FSAMP DAC_Port Switch" value="1" />
+        <ctl name="SPK2 FSAMP DAC_Port Switch" value="0" />
+        <ctl name="SPK3 FSAMP DAC_Port Switch" value="0" />
+        <ctl name="SPK4 FSAMP DAC_Port Switch" value="0" />
+    </path>
+
+    <path name="speaker-right-bottom">
+        <ctl name="SPK1 FSAMP Scene" value="MUSIC" />
+        <ctl name="SPK2 FSAMP Scene" value="MUSIC" />
+        <ctl name="SPK3 FSAMP Scene" value="MUSIC" />
+        <ctl name="SPK4 FSAMP Scene" value="MUSIC" />
+        <ctl name="SPK1 FSAMP DAC_Port Switch" value="0" />
+        <ctl name="SPK2 FSAMP DAC_Port Switch" value="0" />
+        <ctl name="SPK3 FSAMP DAC_Port Switch" value="1" />
+        <ctl name="SPK4 FSAMP DAC_Port Switch" value="0" />
+    </path>
+
+    <path name="headset-mic-mmi">
+        <ctl name="TX_DEC0 Volume" value="84" />
+        <path name="amic2" />
+    </path>
+
+    <path name="headphones-mmi">
+        <ctl name="RX_MACRO RX0 MUX" value="AIF1_PB" />
+        <ctl name="RX_MACRO RX1 MUX" value="AIF1_PB" />
+        <ctl name="RX_CDC_DMA_RX_0 Channels" value="Two" />
+        <ctl name="RX INT0_1 MIX1 INP0" value="RX0" />
+        <ctl name="RX INT1_1 MIX1 INP0" value="RX1" />
+        <ctl name="RX INT0 DEM MUX" value="CLSH_DSM_OUT" />
+        <ctl name="RX INT1 DEM MUX" value="CLSH_DSM_OUT" />
+        <ctl name="RX_COMP1 Switch" value="1" />
+        <ctl name="RX_COMP2 Switch" value="1" />
+        <ctl name="HPHL_COMP Switch" value="1" />
+        <ctl name="HPHR_COMP Switch" value="1" />
+        <ctl name="HPHL_RDAC Switch" value="1" />
+        <ctl name="HPHR_RDAC Switch" value="1" />
+    </path>
+
+    <path name="first-mic">
+        <path name="amic1" />
+        <ctl name="ADC1 Volume" value="12" />
+    </path>
+    <!-- lux mmitest end -->
 
     <path name="speaker-mono">
         <path name="speaker" />
@@ -2991,8 +3083,6 @@
         <ctl name="RX INT1 DEM MUX" value="CLSH_DSM_OUT" />
         <ctl name="RX_COMP1 Switch" value="1" />
         <ctl name="RX_COMP2 Switch" value="1" />
-        <ctl name="HPH_L Switch" value="1" />
-        <ctl name="HPH_R Switch" value="1" />
         <ctl name="HPHL_COMP Switch" value="1" />
         <ctl name="HPHR_COMP Switch" value="1" />
         <ctl name="HPHL_RDAC Switch" value="1" />
@@ -3087,6 +3177,10 @@
     </path>
 
     <path name="voice-speaker-stereo">
+        <ctl name="SPK1 FSAMP Volume" value="970" />
+        <ctl name="SPK2 FSAMP Volume" value="970" />
+        <ctl name="SPK3 FSAMP Volume" value="970" />
+        <ctl name="SPK4 FSAMP Volume" value="970" />
         <path name="speaker" />
     </path>
 
@@ -3252,6 +3346,9 @@
     <path name="bt-sco-mic-swb">
     </path>
 
+    <path name="bt-a2dp-mic">
+    </path>
+
     <path name="usb-headset-mic">
     </path>
 
@@ -3263,30 +3360,34 @@
         <ctl name="TX DEC1 MUX" value="SWR_MIC" />
         <ctl name="TX SMIC MUX1" value="SWR_MIC5" />
         <ctl name="TX_AIF1_CAP Mixer DEC1" value="1" />
-        <ctl name="ADC1 ChMap" value="SWRM_TX1_CH1" />
-        <ctl name="ADC1_MIXER Switch" value="1" />
-        <ctl name="TX DEC2 MUX" value="SWR_MIC" />
-        <ctl name="TX SMIC MUX2" value="SWR_MIC0" />
-        <ctl name="TX_AIF1_CAP Mixer DEC2" value="1" />
         <ctl name="ADC2_BCS Disable" value="1" />
         <ctl name="ADC2 ChMap" value="SWRM_TX2_CH2" />
         <ctl name="ADC2_MIXER Switch" value="1" />
         <ctl name="ADC2 MUX" value="INP3" />
+        <ctl name="ADC2 Volume" value="12" />
+        <ctl name="TX DEC2 MUX" value="SWR_MIC" />
+        <ctl name="TX SMIC MUX2" value="SWR_MIC0" />
+        <ctl name="TX_AIF1_CAP Mixer DEC2" value="1" />
+        <ctl name="ADC1 ChMap" value="SWRM_TX1_CH1" />
+        <ctl name="ADC1_MIXER Switch" value="1" />
+        <ctl name="ADC1 Volume" value="12" />
     </path>
 
     <path name="speaker-dmic-endfire">
         <ctl name="TX DEC1 MUX" value="SWR_MIC" />
-        <ctl name="TX SMIC MUX1" value="SWR_MIC0" />
+        <ctl name="TX SMIC MUX1" value="SWR_MIC5" />
         <ctl name="TX_AIF1_CAP Mixer DEC1" value="1" />
-        <ctl name="ADC1 ChMap" value="SWRM_TX1_CH1" />
-        <ctl name="ADC1_MIXER Switch" value="1" />
-        <ctl name="TX DEC2 MUX" value="SWR_MIC" />
-        <ctl name="TX SMIC MUX2" value="SWR_MIC5" />
-        <ctl name="TX_AIF1_CAP Mixer DEC2" value="1" />
         <ctl name="ADC2_BCS Disable" value="1" />
         <ctl name="ADC2 ChMap" value="SWRM_TX2_CH2" />
         <ctl name="ADC2_MIXER Switch" value="1" />
         <ctl name="ADC2 MUX" value="INP3" />
+        <ctl name="ADC2 Volume" value="6" />
+        <ctl name="TX DEC2 MUX" value="SWR_MIC" />
+        <ctl name="TX SMIC MUX2" value="SWR_MIC0" />
+        <ctl name="TX_AIF1_CAP Mixer DEC2" value="1" />
+        <ctl name="ADC1 ChMap" value="SWRM_TX1_CH1" />
+        <ctl name="ADC1_MIXER Switch" value="1" />
+        <ctl name="ADC1 Volume" value="6" />
     </path>
 
     <path name="dmic-endfire">
@@ -3305,6 +3406,8 @@
 
     <path name="speaker-stereo-dmic-ef">
         <path name="speaker-dmic-endfire" />
+        <ctl name="ADC2 Volume" value="12" />
+        <ctl name="ADC1 Volume" value="12" />
     </path>
 
     <path name="voice-dmic-ef-tmus">
@@ -3317,6 +3420,11 @@
 
     <path name="voice-speaker-dmic-ef">
         <path name="speaker-dmic-endfire" />
+    </path>
+
+    <path name="voip-speaker-dmic-ef">
+        <path name="speaker-dmic-endfire" />
+        <ctl name="TX_DEC2 Volume" value="84" />
     </path>
 
     <path name="voice-rec-dmic-ef">
@@ -3355,11 +3463,7 @@
         <path name="dmic-endfire-liquid" />
     </path>
     <path name="speaker-dmic-broadside">
-        <ctl name="TX_CDC_DMA_TX_3 Channels" value="Two" />
-        <ctl name="TX_AIF1_CAP Mixer DEC1" value="1" />
-        <ctl name="TX DMIC MUX1" value="DMIC1" />
-        <ctl name="TX_AIF1_CAP Mixer DEC2" value="1" />
-        <ctl name="TX DMIC MUX2" value="DMIC2" />
+        <path name="speaker-dmic-endfire" />
     </path>
 
     <path name="dmic-broadside">

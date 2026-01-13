@@ -78,11 +78,11 @@ codec_library="lib_bt_aptx.so" />
         <in-device>
             <id>PAL_DEVICE_IN_HANDSET_MIC</id>
             <back_end_name>CODEC_DMA-LPAIF_RXTX-TX-3</back_end_name>
-            <max_channels>2</max_channels>
-            <channels>1</channels>
+            <max_channels>4</max_channels>
+            <channels>2</channels>
             <samplerate>48000</samplerate>
             <bit_width>16</bit_width>
-            <snd_device_name>handset-mic</snd_device_name>
+            <snd_device_name>handset-dmic-endfire</snd_device_name>
         <!-- Comment the channels and backend lines and uncomment this when handset-dmic-endfire is needed
             <channels>2</channels>
             <snd_device_name>handset-dmic-endfire</snd_device_name>
@@ -95,17 +95,26 @@ codec_library="lib_bt_aptx.so" />
             <usecase>
                 <name>PAL_STREAM_DEEP_BUFFER</name>
                 <devicePP-metadata>
-                    <kvpair key="0xAD000000" value="0xAD000002"/>
-                    <!-- AUDIO_FLUENCE_SMECNS -->
+                    <!-- <kvpair key="0xAD000000" value="0xAD000003"/> -->
+                    <!-- AUDIO_FLUENCE_ENDFIRE -->
                     <!-- These key and value are derived from kvh2xml.h and
 should always be in sync with it -->
                 </devicePP-metadata>
+                <custom-config key="mainmic-mmi">
+                    <channels>1</channels>
+                    <snd_device_name>first-mic</snd_device_name>
+                </custom-config>
+                <custom-config key="submic-mmi">
+                    <channels>1</channels>
+                    <snd_device_name>amic3</snd_device_name>
+                </custom-config>
+                <snd_device_name>dmic-endfire</snd_device_name>
             </usecase>
             <usecase>
                 <name>PAL_STREAM_VOIP_TX</name>
                 <devicePP-metadata>
-                    <kvpair key="0xAD000000" value="0xAD000007"/>
-                    <!-- VOIP_FLUENCE_SMECNS -->
+                    <kvpair key="0xAD000000" value="0xAD00000D"/>
+                    <!-- VOIP_FLUENCE_ENDFIRE -->
                     <!-- These key and value are derived from kvh2xml.h and
 should always be in sync with it -->
                 </devicePP-metadata>
@@ -115,8 +124,8 @@ should always be in sync with it -->
                 <sidetone_mode>HW</sidetone_mode>
                 <bit_width>16</bit_width>
                 <devicePP-metadata>
-                    <kvpair key="0xAD000000" value="0xAD000008"/>
-                    <!-- VOICE_FLUENCE_SMECNS -->
+                    <kvpair key="0xAD000000" value="0xAD000009"/>
+                    <!-- VOICE_FLUENCE_ENDFIRE -->
                     <!-- These key and value are derived from kvh2xml.h and
 should always be in sync with it -->
                 </devicePP-metadata>
@@ -157,8 +166,8 @@ should always be in sync with it -->
             <max_channels>4</max_channels>
             <samplerate>48000</samplerate>
             <bit_width>16</bit_width>
-            <channels>1</channels>
-            <snd_device_name>speaker-mic</snd_device_name>
+            <channels>2</channels>
+            <snd_device_name>speaker-dmic-endfire</snd_device_name>
         <!-- Comment the channels and backend lines and uncomment this when speaker-dmic-endfire is needed
             <channels>2</channels>
             <snd_device_name>speaker-dmic-endfire</snd_device_name>
@@ -171,28 +180,30 @@ should always be in sync with it -->
             <usecase>
                 <name>PAL_STREAM_DEEP_BUFFER</name>
                 <devicePP-metadata>
-                    <kvpair key="0xAD000000" value="0xAD000002"/>
-                    <!-- AUDIO_FLUENCE_SMECNS -->
+                    <!-- <kvpair key="0xAD000000" value="0xAD000003"/> -->
+                    <!-- AUDIO_FLUENCE_ENDFIRE -->
                     <!-- These key and value are derived from kvh2xml.h and
 should always be in sync with it -->
                 </devicePP-metadata>
+                <snd_device_name>speaker-stereo-dmic-ef</snd_device_name>
             </usecase>
             <usecase>
                 <name>PAL_STREAM_VOIP_TX</name>
                 <devicePP-metadata>
-                    <kvpair key="0xAD000000" value="0xAD000007"/>
-                    <!-- VOIP_FLUENCE_SMECNS -->
+                    <kvpair key="0xAD000000" value="0xAD00000D"/>
+                    <!-- VOIP_FLUENCE_ENDFIRE -->
                     <!-- These key and value are derived from kvh2xml.h and
 should always be in sync with it -->
                 </devicePP-metadata>
+                <snd_device_name>voip-speaker-dmic-ef</snd_device_name>
             </usecase>
             <usecase>
                 <name>PAL_STREAM_VOICE_CALL</name>
                 <sidetone_mode>OFF</sidetone_mode>
                 <bit_width>16</bit_width>
                 <devicePP-metadata>
-                    <kvpair key="0xAD000000" value="0xAD000008"/>
-                    <!-- VOICE_FLUENCE_SMECNS -->
+                    <kvpair key="0xAD000000" value="0xAD000009"/>
+                    <!-- VOICE_FLUENCE_ENDFIRE -->
                     <!-- These key and value are derived from kvh2xml.h and
 should always be in sync with it -->
                 </devicePP-metadata>
@@ -234,7 +245,7 @@ should always be in sync with it -->
         <in-device>
             <id>PAL_DEVICE_IN_WIRED_HEADSET</id>
             <back_end_name>CODEC_DMA-LPAIF_RXTX-TX-3</back_end_name>
-            <max_channels>2</max_channels>
+            <max_channels>1</max_channels>
             <channels>1</channels>
             <snd_device_name>headset-mic</snd_device_name>
             <usecase>
@@ -242,6 +253,9 @@ should always be in sync with it -->
             </usecase>
             <usecase>
                 <name>PAL_STREAM_DEEP_BUFFER</name>
+                <custom-config key="hsmic-mmi">
+                    <snd_device_name>headset-mic-mmi</snd_device_name>
+                </custom-config>
             </usecase>
             <usecase>
                 <name>PAL_STREAM_VOIP_TX</name>
@@ -326,7 +340,7 @@ should always be in sync with it -->
             <channels>1</channels>
             <samplerate>8000</samplerate>
             <bit_width>16</bit_width>
-            <snd_device_name>bt-a2dp</snd_device_name>
+            <snd_device_name>bt-sco-mic</snd_device_name>
             <usecase>
                 <name>PAL_STREAM_LOW_LATENCY</name>
                 <devicePP-metadata>
@@ -398,11 +412,20 @@ should always be in sync with it -->
             </ec_rx_device>
         </in-device>
         <in-device>
+            <id>PAL_DEVICE_IN_VI_FEEDBACK</id>
+            <back_end_name>TDM-LPAIF_WSA-TX-PRIMARY</back_end_name>
+            <max_channels>4</max_channels>
+            <channels>4</channels>
+            <samplerate>48000</samplerate>
+            <bit_width>32</bit_width>
+            <snd_device_name>vi-feedback</snd_device_name>
+        </in-device>
+        <in-device>
             <id>PAL_DEVICE_IN_BLUETOOTH_A2DP</id>
             <back_end_name>SLIM-DEV1-TX-7</back_end_name>
             <max_channels>1</max_channels>
             <channels>1</channels>
-            <snd_device_name>bt-a2dp</snd_device_name>
+            <snd_device_name>bt-a2dp-mic</snd_device_name>
             <samplerate>44100</samplerate>
             <bit_width>16</bit_width>
         </in-device>
@@ -451,20 +474,20 @@ should always be in sync with it -->
         </out-device>
         <out-device>
             <id>PAL_DEVICE_OUT_SPEAKER</id>
-            <back_end_name>CODEC_DMA-LPAIF_RXTX-RX-1</back_end_name>
-            <max_channels>2</max_channels>
-            <channels>1</channels>
+            <back_end_name>TDM-LPAIF_WSA-RX-PRIMARY</back_end_name>
+            <max_channels>4</max_channels>
+            <channels>4</channels>
             <samplerate>48000</samplerate>
-            <bit_width>16</bit_width>
+            <bit_width>32</bit_width>
             <snd_device_name>speaker</snd_device_name>
-            <speaker_protection_enabled>0</speaker_protection_enabled>
+            <speaker_protection_enabled>1</speaker_protection_enabled>
             <cps_enabled>0</cps_enabled>
             <is_24_bit_supported>0</is_24_bit_supported>
             <Charge_concurrency_enabled>0</Charge_concurrency_enabled>
             <!--specify the supported bit format on speaker end point -->
             <!--this should be in the form of pal_audio_fmt_id-->
             <!--e.g <supported_bit_format >PAL_AUDIO_FMT_PCM_S24_LE</supported_bit_format>-->
-            <supported_bit_format>PAL_AUDIO_FMT_PCM_S16_LE</supported_bit_format>
+            <supported_bit_format>PAL_AUDIO_FMT_PCM_S32_LE</supported_bit_format>
             <!-- RAS should be enabled with speaker protection always -->
             <ras_enabled>0</ras_enabled>
             <!-- Flag to specify speaker in case Voice call is switched from
@@ -479,18 +502,70 @@ should always be in sync with it -->
             <usecase>
                 <name>PAL_STREAM_VOICE_CALL</name>
                 <priority>2</priority>
-                <channels>1</channels>
-                <snd_device_name>speaker-mono-2</snd_device_name>
+                <channels>4</channels>
+                <snd_device_name>voice-speaker-stereo</snd_device_name>
             </usecase>
             <usecase>
                 <name>PAL_STREAM_VOIP_RX</name>
-                <samplerate>16000</samplerate>
                 <priority>3</priority>
             </usecase>
             <usecase>
                 <name>PAL_STREAM_ULTRASOUND</name>
                 <priority>1</priority>
                 <samplerate>96000</samplerate>
+            </usecase>
+            <usecase>
+                <name>PAL_STREAM_PCM_OFFLOAD</name>
+                <custom-config key="speaker-left-top">
+                    <channels>4</channels>
+                    <snd_device_name>speaker-left-top</snd_device_name>
+                </custom-config>
+                <custom-config key="speaker-right-top">
+                    <channels>4</channels>
+                    <snd_device_name>speaker-right-top</snd_device_name>
+                </custom-config>
+                <custom-config key="speaker-left-bottom">
+                    <channels>4</channels>
+                    <snd_device_name>speaker-left-bottom</snd_device_name>
+                </custom-config>
+                <custom-config key="speaker-right-bottom">
+                    <channels>4</channels>
+                    <snd_device_name>speaker-right-bottom</snd_device_name>
+                </custom-config>
+                <custom-config key="speaker-mmi">
+                    <channels>4</channels>
+                    <snd_device_name>speaker</snd_device_name>
+                </custom-config>
+            </usecase>
+            <usecase>
+                <name>PAL_STREAM_LOW_LATENCY</name>
+                <custom-config key="speaker-mmi">
+                    <channels>4</channels>
+                    <snd_device_name>speaker</snd_device_name>
+                </custom-config>
+            </usecase>
+            <usecase>
+                <name>PAL_STREAM_DEEP_BUFFER</name>
+                <custom-config key="speaker-left-top">
+                    <channels>4</channels>
+                    <snd_device_name>speaker-left-top</snd_device_name>
+                </custom-config>
+                <custom-config key="speaker-right-top">
+                    <channels>4</channels>
+                    <snd_device_name>speaker-right-top</snd_device_name>
+                </custom-config>
+                <custom-config key="speaker-left-bottom">
+                    <channels>4</channels>
+                    <snd_device_name>speaker-left-bottom</snd_device_name>
+                </custom-config>
+                <custom-config key="speaker-right-bottom">
+                    <channels>4</channels>
+                    <snd_device_name>speaker-right-bottom</snd_device_name>
+                </custom-config>
+                <custom-config key="speaker-mmi">
+                    <channels>4</channels>
+                    <snd_device_name>speaker</snd_device_name>
+                </custom-config>
             </usecase>
         </out-device>
         <out-device>
@@ -556,6 +631,18 @@ should always be in sync with it -->
                <samplerate>48000</samplerate>
                <bit_width>16</bit_width>
            </usecase>
+            <usecase>
+                <name>PAL_STREAM_PCM_OFFLOAD</name>
+                <custom-config key="headphone-mmi">
+                    <snd_device_name>headphones-mmi</snd_device_name>
+                </custom-config>
+            </usecase>
+            <usecase>
+                <name>PAL_STREAM_DEEP_BUFFER</name>
+                <custom-config key="headphone-mmi">
+                    <snd_device_name>headphones-mmi</snd_device_name>
+                </custom-config>
+            </usecase>
         </out-device>
         <out-device>
             <id>PAL_DEVICE_OUT_WIRED_HEADPHONE</id>
@@ -648,7 +735,7 @@ should always be in sync with it -->
             <back_end_name>SLIM-DEV1-RX-7</back_end_name>
             <max_channels>1</max_channels>
             <channels>1</channels>
-            <snd_device_name>bt-sco</snd_device_name>
+            <snd_device_name>bt-sco-headset</snd_device_name>
             <samplerate>8000</samplerate>
             <bit_width>16</bit_width>
             <usecase>
