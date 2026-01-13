@@ -142,7 +142,8 @@ Stream* Stream::create(struct pal_stream_attributes *sAttr, struct pal_device *d
 
         if (strlen(dAttr[i].custom_config.custom_key)) {
             strlcpy(palDevsAttr[count].custom_config.custom_key, dAttr[i].custom_config.custom_key, PAL_MAX_CUSTOM_KEY_SIZE);
-            PAL_DBG(LOG_TAG, "found custom key %s", dAttr[i].custom_config.custom_key);
+            /* P86801AA1-1797, zhouweijie.lux, 2025.10.15, change log level */
+            PAL_INFO(LOG_TAG, "found custom key %s", dAttr[i].custom_config.custom_key);
 
         } else {
             strlcpy(palDevsAttr[count].custom_config.custom_key, "", PAL_MAX_CUSTOM_KEY_SIZE);
@@ -1005,9 +1006,7 @@ int32_t Stream::handleBTDeviceNotReady(bool& a2dpSuspend)
             }
 
             mDevices.push_back(dev);
-            rm->lockGraph();
             status = session->setupSessionDevice(this, mStreamAttr->type, dev);
-            rm->unlockGraph();
             if (0 != status) {
                 PAL_ERR(LOG_TAG, "setupSessionDevice failed:%d", status);
                 dev->close();
@@ -1176,15 +1175,14 @@ int32_t Stream::connectStreamDevice_l(Stream* streamHandle, struct pal_device *d
     }
 
     mDevices.push_back(dev);
-    rm->lockGraph();
     status = session->setupSessionDevice(streamHandle, mStreamAttr->type, dev);
     if (0 != status) {
         PAL_ERR(LOG_TAG, "setupSessionDevice for %d failed with status %d",
                 dev->getSndDeviceId(), status);
-        rm->unlockGraph();
         goto dev_close;
     }
 
+    rm->lockGraph();
     if (currentState != STREAM_INIT && currentState != STREAM_STOPPED) {
         status = dev->start();
         if (0 != status) {
@@ -1856,10 +1854,6 @@ bool Stream::checkStreamMatch(pal_device_id_t pal_device_id,
 
     //device
     for (int i = 0; i < mDevices.size();i++) {
-       if (mDevices[i] == NULL){
-             PAL_ERR(LOG_TAG,"mDevices[%d] is NULL \n", i);
-             return false;
-       }
        status = mDevices[i]->getDeviceAttributes(&dAttr);
        if (0 != status) {
           PAL_ERR(LOG_TAG,"getDeviceAttributes Failed \n");
