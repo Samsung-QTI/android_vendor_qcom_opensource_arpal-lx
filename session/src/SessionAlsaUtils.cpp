@@ -1531,6 +1531,13 @@ int SessionAlsaUtils::open(Stream * streamHandle, std::shared_ptr<ResourceManage
         }
     }
     deviceCKV.clear();
+    //+P86801AA1, zhouweijie.lux, 20250910, setmode ckv
+    if ((rxBackEnds[0].first == PAL_DEVICE_OUT_SPEAKER) || (txBackEnds[0].first == PAL_DEVICE_IN_SPEAKER_MIC)) {
+        PAL_INFO(LOG_TAG, "FSM SessionAlsaUtils:: open enter");
+        rmHandle->setFsmSpkMode();
+        status = builder->populateFsmCalKeyVector(streamHandle, deviceCKV, FSM_SPK_MODE_ENABLE);
+    }
+    //-P86801AA1, zhouweijie.lux, 20250910, setmode ckv
     if (ResourceManager::isSpeakerProtectionEnabled) {
         PAL_DBG(LOG_TAG, "Speaker protection enabled");
         if (rxBackEnds[0].first == PAL_DEVICE_OUT_SPEAKER) {
