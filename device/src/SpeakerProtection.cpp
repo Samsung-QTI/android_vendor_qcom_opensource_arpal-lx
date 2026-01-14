@@ -4053,12 +4053,166 @@ void SpeakerProtection::setFsmRdcValue(int device, fsm_algo_calib_data_t *cali_r
         return;
     }
 
+    header = (struct apm_module_param_data_t *)payload;
+    header->module_instance_id = miid;
+    header->param_id = FSADSP_PARAM_ID_SET_ALGO_RE25;
+    header->param_size = payload_size - sizeof(struct apm_module_param_data_t);
+    header->error_code = 0;
+
+    memcpy(payload + sizeof(struct apm_module_param_data_t), cali_re, data_len);
+    SessionAlsaUtils::setMixerParameter(virtMixer, device, payload, payload_size + pad_bytes);
+
+    for(i = 0; i < FSM_DEV_NUM; i++)
+        PAL_INFO(LOG_TAG, "set re25[%d]=%d done!", i, cali_re->calib_data[i].re25);
+
+    free(payload);
+    payload = NULL;
+
+    return;
+}
+
+int g_pcm_dev = 0;
+#endif
+//+P86801AA1, zhouweijie.lux, 20250909, add channel reversal function
+void SpeakerProtection::setFsmCrossfadeInfo(int device, int mode, int angle) {
+    int ret = 0;
+    uint32_t miid = 0;
+    int data_len = 0;
+    uint8_t *payload = NULL;
+    uint32_t payload_size = 0;
+    uint32_t pad_bytes = 0;
+    std::string backendName;
+    struct apm_module_param_data_t *header = NULL;
+    fsm_crossfade_t crossfade;
+
+    PAL_INFO(LOG_TAG, "Foursemi parse param, mode:%d, angle:%d", mode, angle);
+    switch(mode) {
+        case FSM_CROSSFADE_MODE0:
+            crossfade.mode = 0;
+            crossfade.targetdb = -80 * 1000;
+            crossfade.type1 = 0;
+            crossfade.transitiont1 = 0.5 * 1000;
+            break;
+        case FSM_CROSSFADE_MODE1:
+            crossfade.mode = 1;
+            crossfade.targetdb = -60 * 1000;//mdb
+            crossfade.type1 = 0;
+            crossfade.transitiont1 = 0.5 * 1000;//ms
+            break;
+        case FSM_CROSSFADE_MODE2:
+            crossfade.mode = 2;
+            crossfade.targetdb = -85 * 1000;
+            crossfade.type1 = 0;
+            crossfade.transitiont1 = 0.5 * 1000;
+            crossfade.type2 = 0;
+            crossfade.transitiont2 = 0.6 * 1000;
+            crossfade.holdt = 2 * 1000;//ms
+            break;
+        case FSM_CROSSFADE_MODE3:
+            crossfade.mode = 3;
+            crossfade.type1 = 1;
+            crossfade.transitiont1 = 0.4 * 1000;
+            if (angle == 0) {
+                crossfade.ch_sel[0] = 0;
+                crossfade.ch_sel[1] = 1;
+                crossfade.ch_sel[2] = 2;
+                crossfade.ch_sel[3] = 3;
+            } else if (angle == 90) {
+                crossfade.ch_sel[0] = 1;
+                crossfade.ch_sel[1] = 3;
+                crossfade.ch_sel[2] = 0;
+                crossfade.ch_sel[3] = 2;
+            } else if (angle == 180) {
+                crossfade.ch_sel[0] = 3;
+                crossfade.ch_sel[1] = 2;
+                crossfade.ch_sel[2] = 1;
+                crossfade.ch_sel[3] = 0;
+            } else if (angle == 270) {
+                crossfade.ch_sel[0] = 2;
+                crossfade.ch_sel[1] = 0;
+                crossfade.ch_sel[2] = 3;
+                crossfade.ch_sel[3] = 1;
+            } else{
+                PAL_ERR(LOG_TAG, "Foursemi passed invalid angle.");
+            }
+            break;
+        default:
+            PAL_ERR(LOG_TAG, "Foursemi passed invalid mode.");
+            return;
+    }
+
+    PAL_INFO(LOG_TAG, "FourSemi send crossfade info:");
+    PAL_INFO(LOG_TAG, "FourSemi module config1: mode->%d, targetdb->%d, type1->%d, transitiont1->%dms",
+            crossfade.mode, crossfade.targetdb / 1000, crossfade.type1, crossfade.transitiont1);
+    PAL_INFO(LOG_TAG, "FourSemi module config2: type2->%d, transitiont2->%d, holdt->%d",
+            crossfade.type2, crossfade.transitiont2 / 1000, crossfade.holdt / 1000);
+    PAL_INFO(LOG_TAG, "FourSemi module config3: ch[0]->%d, ch[1]->%d, ch[2]->%d, ch[3]->%d",
+            crossfade.ch_sel[0], crossfade.ch_sel[1], crossfade.ch_sel[2], crossfade.ch_sel[3]);
+
+    rm->getBackendName(PAL_DEVICE_OUT_SPEAKER, backendName);
+    if (!strlen(backendName.c_str())) {
+        PAL_ERR(LOG_TAG, "FourSemi: Failed to obtain speaker backend name.");
+        return;
+    }
+    ret = SessionAlsaUtils::getModuleInstanceId(virtMixer, device,
+                        backendName.c_str(), MODULE_SP, &miid);
+    if (0 != ret) {
+        PAL_ERR(LOG_TAG, "FourSemi: Failed to get MODULE_SP tag info");
+        return;
+    }
+
+    data_len = sizeof(fsm_crossfade_t);
+    payload_size = sizeof(struct apm_module_param_data_t) + FS_ALIGN_4BYTE(data_len);
+    pad_bytes = FS_PADDING_ALIGN_8BYTE(payload_size);
+    payload = (uint8_t *)calloc(1, payload_size + pad_bytes);
+    if (payload == NULL) {
+        PAL_ERR(LOG_TAG, "FourSemi calloc memory for payload failed");
+        return;
+    }
+
+    header = (struct apm_module_param_data_t *)payload;
+    header->module_instance_id = miid;
+    header->param_id = FSADSP_PARAM_ID_SEND_CROSSFADE_INFO;
+    header->param_size = payload_size - sizeof(struct apm_module_param_data_t);
+    header->error_code = 0;
+
+    memcpy(payload + sizeof(struct apm_module_param_data_t), &crossfade, data_len);
+    SessionAlsaUtils::setMixerParameter(virtMixer, device, payload, payload_size + pad_bytes);
+
+    PAL_INFO(LOG_TAG, "FourSemi send crossfade info done.");
+    free(payload);
+    payload = NULL;
+
+    return;
+}
+//-P86801AA1, zhouweijie.lux, 20250909, add channel reversal function
 int32_t SpeakerProtection::setParameter(uint32_t param_id, void *param)
 {
     PAL_DBG(LOG_TAG, "Inside Speaker Protection Set parameters");
     (void ) param;
+//+P86801AA1, zhouweijie.lux, 20250909, add channel reversal function
+#ifdef PAL_SUPPORT_FS19XX
+    if (param_id == PAL_PARAM_ID_SET_SPK_RE) {
+        int pcm_dev = *((int *)param);
+
+        g_pcm_dev = pcm_dev;
+        PAL_INFO(LOG_TAG, "setParameter enter, set RDC, pcm_dev:%d.", g_pcm_dev);
+        setFsmRdcValue(pcm_dev, &fsmReValue, sizeof(fsm_algo_calib_data_t));
+    } else if (param_id == PAL_PARAM_ID_LUX_DEVICE_ROTATION) {
+        //parm[0] for angle, param[1] pcm
+        int *cf_param = (int *)param;
+        int angle = cf_param[0];
+        int pcm_dev = cf_param[1];
+        int mode = 3;
+
+        PAL_INFO(LOG_TAG, "setParameter enter, cf_mode:%d, angle:%d", mode, angle);
+        setFsmCrossfadeInfo(pcm_dev, mode, angle);
+     }
+#else
     if (param_id == PAL_SP_MODE_DYNAMIC_CAL)
         speakerProtectionDynamicCal();
+#endif
+//-P86801AA1, zhouweijie.lux, 20250909, add channel reversal function
     return 0;
 }
 

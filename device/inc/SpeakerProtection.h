@@ -43,7 +43,74 @@
 #include "ResourceManager.h"
 
 class Device;
+//+P86801AA1, zhouweijie.lux, 20250909, add channel reversal function
+/************* add by foursemi **************/
+// DEFINES FOR CALIB
+#define FSM_RDC_BIN                    "/mnt/vendor/persist/factory/audio/fsm_calib.bin" // same as before upgrade
+#define FSM_RE_RANGE_PATH              "/data/fsm_calib_range.config"
+#define FS_ALIGN_4BYTE(x)              (((x) + 3) & (~3))
+#define FS_PADDING_ALIGN_8BYTE(x)      ((((x) + 7) & 7) ^ 7)
+#define FSADSP_PARAM_ID_SET_ALGO_RE25  0x10001FA7
+#define FSADSP_PARAM_ID_GET_CALIB_DATA 0x10001FAB
 
+//TODO:customize part, Make modifications based on different projects
+#define FSM_DEV_NUM             4
+
+typedef struct fsm_data_info
+{
+    uint16_t rstrim;
+    uint16_t channel;
+    uint32_t re25;
+} fsm_data_info_t;
+
+typedef struct fsm_algo_calib_data
+{
+    uint16_t version;
+    uint16_t ndev;
+    fsm_data_info_t calib_data[4];
+} fsm_algo_calib_data_t;
+
+typedef struct fsm_r0_range
+{
+    float r0_min[FSM_DEV_NUM];
+    float r0_max[FSM_DEV_NUM];
+} fsm_r0_range_t;
+
+typedef struct calib_data_info_sp
+{
+    int32_t re25;
+    int32_t tempr;
+    int32_t reserve1;
+    int32_t f0;
+    int32_t q;
+    int32_t reserve2;
+} calib_data_info_t;
+/********** add by foursemi end ***************/
+
+/************* add by foursemi **************/
+// DEFINES FOR ROTATION
+#define FSADSP_PARAM_ID_SEND_CROSSFADE_INFO  0x10001FB8
+typedef struct fsm_crossfade
+{
+    int mode;         //mode
+    int targetdb;     //targetdb *1000->mdb
+    int type1;        //fade type, 0->linear, 1->log
+    int transitiont1; //fade time, transitiont1 *1000->ms
+    int type2;        //fade type, 0->linear, 1->log
+    int transitiont2; //fade time, transitiont2 *1000->ms
+    int holdt;        //holdt *1000->ms
+    int ch_sel[FSM_DEV_NUM];
+} fsm_crossfade_t;
+
+typedef enum {
+    FSM_CROSSFADE_MODE0,// mode 0, fade out
+    FSM_CROSSFADE_MODE1,// mode 1, fade int
+    FSM_CROSSFADE_MODE2,// mode 2, fade hold
+    FSM_CROSSFADE_MODE3,// mode 3, crossfade
+} fsm_crossfade_mode;
+
+/********** add by foursemi end ***************/
+//-P86801AA1, zhouweijie.lux, 20250909, add channel reversal function
 #define LPASS_WR_CMD_REG_PHY_ADDR 0x3250300
 #define LPASS_RD_CMD_REG_PHY_ADDR 0x3250304
 #define LPASS_RD_FIFO_REG_PHY_ADDR 0x3250318
@@ -164,10 +231,14 @@ public:
     void updateCpsCustomPayload(int miid);
     int updateVICustomPayload(void *payload, size_t size);
     int getCpsDevNumber(std::string mixer);
+    void getFsmCalibRe25(int device, calib_data_info_t *cali_re, int data_len);
+    void setFsmRdcValue(int device, fsm_algo_calib_data_t *cali_re, int data_len);
     int32_t getCalibrationData(void **param);
     int32_t getFTMParameter(void **param);
     void disconnectFeandBe(std::vector<int> pcmDevIds, std::string backEndName);
-
+//+P86801AA1, zhouweijie.lux, 20250909, add channel reversal function
+    void setFsmCrossfadeInfo(int device, int mode, int angle);
+//-P86801AA1, zhouweijie.lux, 20250909, add channel reversal function
     bool canDeviceProceedForCalibration(unsigned long *sec);
     bool isDeviceInUse(unsigned long *sec);
 };

@@ -2275,6 +2275,44 @@ int SessionAlsaUtils::connectSessionDevice(Session* sess, Stream* streamHandle, 
     }
     status = mixer_ctl_set_enum_by_string(connectCtrl, aifBackEndsToConnect[0].second.data());
 
+    //add by foursemi
+    {
+        std::vector<std::shared_ptr<Device>> associatedDevices;
+        streamHandle->getAssociatedDevices(associatedDevices);
+        PAL_INFO(LOG_TAG, "Foursemi set RE");
+
+        for (int i = 0; i < associatedDevices.size(); i++) {
+            int pcm_dev = pcmDevIds.at(0);
+        //+P86801AA1, zhouweijie.lux, 20250909, add channel reversal function
+            int param[2] = {0};
+            switch (rm->lux_screen_rotation) {
+                case 0:
+                    param[0] = 270;
+                    break;
+                case 1:
+                    param[0] = 0;
+                    break;
+                case 2:
+                    param[0] = 90;
+                    break;
+                case 3:
+                    param[0] = 180;
+                    break;
+                default:
+                    param[0] = 0;
+                    break;
+            }
+            param[1] = pcm_dev;
+
+            if (associatedDevices[i]->getSndDeviceId() == PAL_DEVICE_OUT_SPEAKER) {
+                associatedDevices[i]->setParameter(PAL_PARAM_ID_SET_SPK_RE, &pcm_dev);
+                associatedDevices[i]->setParameter(PAL_PARAM_ID_LUX_DEVICE_ROTATION, (void *)param);
+            }
+        //-P86801AA1, zhouweijie.lux, 20250909, add channel reversal function
+        }
+    }
+    //add by foursemi end
+
 exit:
     if(builder) {
        delete builder;

@@ -8853,6 +8853,59 @@ int ResourceManager::setParameter(uint32_t param_id, void *param_payload,
 
         }
         break;
+        //+P86801AA1, zhouweijie.lux, 20250909, add channel reversal function
+        case PAL_PARAM_ID_LUX_DEVICE_ROTATION:
+        {
+            struct pal_device dattr;
+            dattr.id = PAL_DEVICE_OUT_SPEAKER;
+            std::shared_ptr<Device> dev = nullptr;
+            Stream *stream = NULL;
+            Session *session = NULL;
+            std::vector<Stream*> activeStreams;
+            int ret = 0;
+            int pcm = 0;
+            int param[2] = {0};
+//+P86801AA1, zhouweijie.lux, 20250909, add channel reversal function
+            lux_screen_rotation = *((int *)param_payload);
+            //param[0] = *((int *)param_payload);
+            switch (lux_screen_rotation) {
+                case 0:
+                    param[0] = 270;
+                    break;
+                case 1:
+                    param[0] = 0;
+                    break;
+                case 2:
+                    param[0] = 90;
+                    break;
+                case 3:
+                    param[0] = 180;
+                    break;
+                default:
+                    param[0] = 0;
+                    break;
+            }
+//-P86801AA1, zhouweijie.lux, 20250909, add channel reversal function
+            dev = Device::getInstance(&dattr , rm);
+            if (dev) {
+                PAL_INFO(LOG_TAG, "foursemi set rotation.");
+                ret = rm->getActiveStream_l(activeStreams, dev);
+                if ((0 != ret) || (activeStreams.size() == 0)) {
+                    PAL_ERR(LOG_TAG, " no active stream available");
+                    goto exit;
+                }
+                stream = static_cast<Stream *>(activeStreams[0]);
+                stream->getAssociatedSession(&session);
+                session->getFEMixerCtl("getParam", &pcm);
+                param[1] = pcm;
+                dev->setParameter(PAL_PARAM_ID_LUX_DEVICE_ROTATION, (void *)param);
+            }
+            else {
+                PAL_ERR(LOG_TAG, "foursemi Unable to get speaker instance");
+            }
+        }
+        break;
+        //-P86801AA1, zhouweijie.lux, 20250909, add channel reversal function
         case PAL_PARAM_ID_SP_MODE:
         {
             pal_spkr_prot_payload *spModeval =
