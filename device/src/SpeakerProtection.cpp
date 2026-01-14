@@ -492,8 +492,11 @@ int SpeakerProtection::spkrStartCalibrationV2()
         case 2 :
             ch_info.channels = CHANNELS_2;
         break;
+        case 4 :
+            ch_info.channels = CHANNELS_4;
+        break;
         default:
-            PAL_DBG(LOG_TAG, "Unsupported channel. Set default as 2");
+            PAL_ERR(LOG_TAG, "Unsupported channel. Set default as 2");
             ch_info.channels = CHANNELS_2;
         break;
     }
@@ -543,6 +546,9 @@ int SpeakerProtection::spkrStartCalibrationV2()
             calVector.push_back(std::make_pair(SPK_PRO_VI_MAP, spkViMap));
         break;
         case 2 :
+            calVector.push_back(std::make_pair(SPK_PRO_VI_MAP, STEREO_SPKR));
+        break;
+        case 4 :
             calVector.push_back(std::make_pair(SPK_PRO_VI_MAP, STEREO_SPKR));
         break;
         default :
@@ -633,8 +639,11 @@ int SpeakerProtection::spkrStartCalibrationV2()
         case 2 :
             config.channels = CHANNELS_2;
         break;
+        case 4 :
+            config.channels = CHANNELS_4;
+        break;
         default:
-            PAL_DBG(LOG_TAG, "Unsupported channel. Set default as 2");
+            PAL_ERR(LOG_TAG, "Unsupported channel. Set default as 2");
             config.channels = CHANNELS_2;
         break;
     }
@@ -783,8 +792,11 @@ int SpeakerProtection::spkrStartCalibrationV2()
         case 2 :
             deviceRx.config.ch_info.channels = CHANNELS_2;
         break;
+        case 4 :
+            deviceRx.config.ch_info.channels = CHANNELS_4;
+        break;
         default:
-            PAL_DBG(LOG_TAG, "Unsupported channel. Set default as 2");
+            PAL_ERR(LOG_TAG, "Unsupported channel. Set default as 2");
             deviceRx.config.ch_info.channels = CHANNELS_2;
         break;
     }
@@ -815,6 +827,9 @@ int SpeakerProtection::spkrStartCalibrationV2()
             calVector.push_back(std::make_pair(SPK_PRO_DEV_MAP, spkDevMap));
         break;
         case 2 :
+            calVector.push_back(std::make_pair(SPK_PRO_DEV_MAP, LEFT_RIGHT));
+        break;
+        case 4 :
             calVector.push_back(std::make_pair(SPK_PRO_DEV_MAP, LEFT_RIGHT));
         break;
         default :
@@ -885,9 +900,12 @@ int SpeakerProtection::spkrStartCalibrationV2()
 
     config.rate = SAMPLINGRATE_48K;
     config.format = PCM_FORMAT_S16_LE;
-    if (numberOfChannels > 1)
-        config.channels = CHANNELS_2;
-    else
+    if (numberOfChannels > 1) {
+        if (numberOfChannels == 4)
+            config.channels = CHANNELS_4;
+        else
+            config.channels = CHANNELS_2;
+    } else
         config.channels = CHANNELS_1;
     config.period_size = DEFAULT_PERIOD_SIZE;
     config.period_count = DEFAULT_PERIOD_COUNT;
@@ -1150,8 +1168,11 @@ int SpeakerProtection::spkrStartCalibration()
         case 2 :
             ch_info.channels = CHANNELS_2;
         break;
+        case 4 :
+            ch_info.channels = CHANNELS_4;
+        break;
         default:
-            PAL_DBG(LOG_TAG, "Unsupported channel. Set default as 2");
+            PAL_ERR(LOG_TAG, "Unsupported channel. Set default as 2");
             ch_info.channels = CHANNELS_2;
         break;
     }
@@ -1196,6 +1217,9 @@ int SpeakerProtection::spkrStartCalibration()
             calVector.push_back(std::make_pair(SPK_PRO_VI_MAP, spkViMap));
         break;
         case 2 :
+            calVector.push_back(std::make_pair(SPK_PRO_VI_MAP, STEREO_SPKR));
+        break;
+        case 4 :
             calVector.push_back(std::make_pair(SPK_PRO_VI_MAP, STEREO_SPKR));
         break;
         default :
@@ -1286,8 +1310,11 @@ int SpeakerProtection::spkrStartCalibration()
         case 2 :
             config.channels = CHANNELS_2;
         break;
+        case 4 :
+            config.channels = CHANNELS_4;
+        break;
         default:
-            PAL_DBG(LOG_TAG, "Unsupported channel. Set default as 2");
+            PAL_ERR(LOG_TAG, "Unsupported channel. Set default as 2");
             config.channels = CHANNELS_2;
         break;
     }
@@ -1435,8 +1462,11 @@ int SpeakerProtection::spkrStartCalibration()
         case 2 :
             deviceRx.config.ch_info.channels = CHANNELS_2;
         break;
+        case 4 :
+            deviceRx.config.ch_info.channels = CHANNELS_4;
+        break;		
         default:
-            PAL_DBG(LOG_TAG, "Unsupported channel. Set default as 2");
+            PAL_ERR(LOG_TAG, "Unsupported channel. Set default as 2");
             deviceRx.config.ch_info.channels = CHANNELS_2;
         break;
     }
@@ -1467,6 +1497,9 @@ int SpeakerProtection::spkrStartCalibration()
             calVector.push_back(std::make_pair(SPK_PRO_DEV_MAP, spkDevMap));
         break;
         case 2 :
+            calVector.push_back(std::make_pair(SPK_PRO_DEV_MAP, LEFT_RIGHT));
+        break;
+        case 4 :
             calVector.push_back(std::make_pair(SPK_PRO_DEV_MAP, LEFT_RIGHT));
         break;
         default :
@@ -1537,9 +1570,12 @@ int SpeakerProtection::spkrStartCalibration()
 
     config.rate = SAMPLINGRATE_48K;
     config.format = PCM_FORMAT_S16_LE;
-    if (numberOfChannels > 1)
-        config.channels = CHANNELS_2;
-    else
+    if (numberOfChannels > 1) {
+        if (numberOfChannels == 4)
+            config.channels = CHANNELS_4;
+        else
+            config.channels = CHANNELS_2;
+    } else
         config.channels = CHANNELS_1;
     config.period_size = DEFAULT_PERIOD_SIZE;
     config.period_count = DEFAULT_PERIOD_COUNT;
@@ -2507,6 +2543,13 @@ int32_t SpeakerProtection::spkrProtProcessingModeV2(bool flag)
              ch_info.ch_map[0] = PAL_CHMAP_CHANNEL_FL;
              ch_info.ch_map[1] = PAL_CHMAP_CHANNEL_FR;
              break;
+        case 4:
+            ch_info.channels = CHANNELS_4;
+            ch_info.ch_map[0] = PAL_CHMAP_CHANNEL_FL;
+            ch_info.ch_map[1] = PAL_CHMAP_CHANNEL_FR;
+            ch_info.ch_map[2] = PAL_CHMAP_CHANNEL_LB;
+            ch_info.ch_map[3] = PAL_CHMAP_CHANNEL_RB;
+            break;
         default:
             break;
         }
@@ -2557,6 +2600,9 @@ int32_t SpeakerProtection::spkrProtProcessingModeV2(bool flag)
                 calVector.push_back(std::make_pair(SPK_PRO_VI_MAP, spkViMap));
             break;
             case 2 :
+                calVector.push_back(std::make_pair(SPK_PRO_VI_MAP, STEREO_SPKR));
+            break;
+            case 4 :
                 calVector.push_back(std::make_pair(SPK_PRO_VI_MAP, STEREO_SPKR));
             break;
             default :
@@ -2649,8 +2695,11 @@ int32_t SpeakerProtection::spkrProtProcessingModeV2(bool flag)
             case 2 :
                 config.channels = CHANNELS_2;
             break;
+            case 4 :
+                config.channels = CHANNELS_4;
+            break;
             default :
-                PAL_DBG(LOG_TAG, "Unsupported channel. Set default as 2");
+                PAL_ERR(LOG_TAG, "Unsupported channel. Set default as 2");
                 config.channels = CHANNELS_2;
             break;
         }
@@ -3154,8 +3203,16 @@ int SpeakerProtection::viTxSetupThreadLoop()
             ch_info.ch_map[1] = PAL_CHMAP_CHANNEL_FR;
             config.channels = CHANNELS_2;
         break;
+        case 4:
+            ch_info.channels = CHANNELS_4;
+            ch_info.ch_map[0] = PAL_CHMAP_CHANNEL_FL;
+            ch_info.ch_map[1] = PAL_CHMAP_CHANNEL_FR;
+            ch_info.ch_map[2] = PAL_CHMAP_CHANNEL_LB;
+            ch_info.ch_map[3] = PAL_CHMAP_CHANNEL_RB;
+            config.channels = CHANNELS_4;
+        break;
         default:
-            PAL_DBG(LOG_TAG, "Unsupported channel. Set defauly as 2");
+            PAL_ERR(LOG_TAG, "Unsupported channel. Set defauly as 2");
             ch_info.channels = CHANNELS_2;
             config.channels = CHANNELS_2;
         }

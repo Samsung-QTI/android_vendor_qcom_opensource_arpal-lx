@@ -689,7 +689,7 @@ int Session::configureMFC(const std::shared_ptr<ResourceManager>& rm, struct pal
     status = SessionAlsaUtils::getModuleInstanceId(mixer, pcmDevIds.at(0), intf,
                                                    TAG_DEVICE_MFC_SR, &miid);
     if (status == 0) {
-        PAL_DBG(LOG_TAG, "miid : %x id = %d, data %s, dev id = %d\n", miid,
+        PAL_INFO(LOG_TAG, "miid : %x id = %d, data %s, dev id = %d\n", miid,
                 pcmDevIds.at(0), intf, dAttr.id);
 
         if (dAttr.id == PAL_DEVICE_OUT_BLUETOOTH_A2DP ||
@@ -723,6 +723,11 @@ int Session::configureMFC(const std::shared_ptr<ResourceManager>& rm, struct pal
                 mfcData.numChannel = dAttr.config.ch_info.channels;
             mfcData.rotation_type = PAL_SPEAKER_ROTATION_LR;
             mfcData.ch_info = nullptr;
+        }
+
+        if (PAL_DEVICE_OUT_SPEAKER == dAttr.id) {
+            mfcData.bitWidth = 16;
+            mfcData.numChannel = 2;
         }
 
         if ((PAL_DEVICE_OUT_SPEAKER == dAttr.id) &&

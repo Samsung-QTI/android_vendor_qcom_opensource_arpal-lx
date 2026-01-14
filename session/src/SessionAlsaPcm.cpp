@@ -159,7 +159,9 @@ int SessionAlsaPcm::open(Stream * s)
                 rm->freeFrontEndIds(pcmDevIds, sAttr, ldir);
                 frontEndIdAllocated = false;
             } else {
-                if (sAttr.type != PAL_STREAM_CONTEXT_PROXY) {
+                if (sAttr.type != PAL_STREAM_CONTEXT_PROXY &&
+                     sAttr.type != PAL_STREAM_VOICE_CALL_RECORD &&
+                     sAttr.type != PAL_STREAM_VOICE_CALL_MUSIC) {
                     // Register for  mixer event callback for mic occlusion.
                     status = rm->registerMixerEventCallback(pcmDevIds, sessionCb,
                             cbCookie, true);
@@ -1232,7 +1234,9 @@ set_mixer:
             }
 
             if (!status && isMixerEventCbRegd &&
-                (sAttr.type != PAL_STREAM_CONTEXT_PROXY)) {
+               (sAttr.type != PAL_STREAM_CONTEXT_PROXY &&
+                sAttr.type != PAL_STREAM_VOICE_CALL_RECORD &&
+                sAttr.type != PAL_STREAM_VOICE_CALL_MUSIC)) {
                 // Register for callback for Mic Occlusion Notification
                 size_t payload_size = 0;
                 struct agm_event_reg_cfg event_cfg;
@@ -1478,7 +1482,9 @@ int SessionAlsaPcm::stop(Stream * s)
             }
             // Deregister for callback for Mic Occlusion
             if (!status && isMicOcclusionRegistrationDone &&
-                (sAttr.type != PAL_STREAM_CONTEXT_PROXY)) {
+                (sAttr.type != PAL_STREAM_CONTEXT_PROXY &&
+                 sAttr.type != PAL_STREAM_VOICE_CALL_RECORD &&
+                 sAttr.type != PAL_STREAM_VOICE_CALL_MUSIC)) {
                 payload_size = sizeof(struct agm_event_reg_cfg);
                 memset(&event_cfg, 0, sizeof(event_cfg));
                 event_cfg.event_id = EVENT_ID_MIC_OCCLUSION_STATUS_INFO;
@@ -1681,7 +1687,9 @@ int SessionAlsaPcm::close(Stream * s)
 
             // Deregister callback for Mixer Event
             if (!status && isMixerEventCbRegd &&
-                (sAttr.type != PAL_STREAM_CONTEXT_PROXY)) {
+                (sAttr.type != PAL_STREAM_CONTEXT_PROXY &&
+                 sAttr.type != PAL_STREAM_VOICE_CALL_RECORD &&
+                 sAttr.type != PAL_STREAM_VOICE_CALL_MUSIC)) {
                 status = rm->registerMixerEventCallback(pcmDevIds,
                     sessionCb, cbCookie, false);
                 if (status == 0) {
@@ -1872,7 +1880,9 @@ int SessionAlsaPcm::disconnectSessionDevice(Stream *streamHandle,
         int cnt = 0;
             // Deregister for callback for Mic Occlusion during device switch
             if (!status && isMicOcclusionRegistrationDone &&
-                (streamType != PAL_STREAM_CONTEXT_PROXY)) {
+                (streamType != PAL_STREAM_CONTEXT_PROXY &&
+                 streamType != PAL_STREAM_VOICE_CALL_RECORD &&
+                 streamType != PAL_STREAM_VOICE_CALL_MUSIC)) {
                 payload_size = sizeof(struct agm_event_reg_cfg);
                 memset(&event_cfg, 0, sizeof(event_cfg));
                 event_cfg.event_id = EVENT_ID_MIC_OCCLUSION_STATUS_INFO;
@@ -1992,7 +2002,9 @@ int SessionAlsaPcm::connectSessionDevice(Stream* streamHandle, pal_stream_type_t
         /* Re-register for the new device during device switch.*/
 
         if (!status && isMixerEventCbRegd &&
-            (streamType != PAL_STREAM_CONTEXT_PROXY)) {
+            (streamType != PAL_STREAM_CONTEXT_PROXY &&
+             streamType != PAL_STREAM_VOICE_CALL_RECORD &&
+             streamType != PAL_STREAM_VOICE_CALL_MUSIC)) {
             // Register for callback for Mic Occlusion Notification
             size_t payload_size = 0;
             struct agm_event_reg_cfg event_cfg;

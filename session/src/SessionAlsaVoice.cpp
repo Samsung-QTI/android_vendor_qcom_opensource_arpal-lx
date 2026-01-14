@@ -563,6 +563,8 @@ int SessionAlsaVoice::populate_rx_mfc_payload(Stream *s, uint32_t rx_mfc_tag)
             break;
         }
     }
+    PAL_INFO(LOG_TAG, "miid : %x id = %d, data %s, dev id = %d\n", miid,
+            pcmDevRxIds.at(0), rxAifBackEnds[0].second.c_str(), dAttr.id);
     if (dAttr.id == 0) {
         PAL_ERR(LOG_TAG, "Failed to get device attributes");
         status = -EINVAL;
@@ -597,6 +599,12 @@ int SessionAlsaVoice::populate_rx_mfc_payload(Stream *s, uint32_t rx_mfc_tag)
         deviceData.numChannel = dAttr.config.ch_info.channels;
         deviceData.ch_info = nullptr;
     }
+
+    if (dAttr.id == PAL_DEVICE_OUT_SPEAKER) {
+        deviceData.numChannel = 2;
+        deviceData.bitWidth = 16;
+    }
+
     builder->payloadMFCConfig(&payload, &payloadSize, miid, &deviceData);
     if (payload && payloadSize) {
         status = updateCustomPayload(payload, payloadSize);
@@ -730,6 +738,7 @@ int SessionAlsaVoice::start(Stream * s)
     size_t payloadSize = 0;
     struct pal_volume_data *volume = NULL;
     bool isTxStarted = false, isRxStarted = false;
+    std::vector<std::shared_ptr<Device>> associatedDevices;
 
     PAL_DBG(LOG_TAG,"Enter");
 
@@ -1667,7 +1676,7 @@ int SessionAlsaVoice::payloadCalKeys(Stream * s, uint8_t **payload, size_t *size
 
     *size = payloadSize + padBytes;
     *payload = payloadInfo;
-    PAL_DBG(LOG_TAG, "Volume level: %lf, volume boost: %d, HD voice: %d",
+    PAL_INFO(LOG_TAG, "Volume level: %lf, volume boost: %d, HD voice: %d",
             percent_to_index(vol, MIN_VOL_INDEX, max_vol_index),
             volume_boost, hd_voice);
 
