@@ -36,6 +36,7 @@
 #include <memory>
 #include <string>
 #include "PalDefs.h"
+#include "kvh2xml.h"
 #include "SoundTriggerUtils.h"
 #include "SoundTriggerXmlParser.h"
 
