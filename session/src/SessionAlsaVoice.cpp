@@ -45,7 +45,7 @@
 #include "audio_route/audio_route.h"
 
 #define PAL_PADDING_8BYTE_ALIGN(x)  ((((x) + 7) & 7) ^ 7)
-#define MAX_VOL_INDEX 5
+#define MAX_VOL_INDEX 8  //P86801AA1, zhouweijie.lux, Increase the volume from level 6 to level 8
 #define MIN_VOL_INDEX 0
 #define percent_to_index(val, min, max) \
             ((val) * ((max) - (min)) * 0.01 + (min) + .5)
