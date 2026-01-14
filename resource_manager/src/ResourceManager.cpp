@@ -694,6 +694,34 @@ void ResourceManager::sendCrashSignal(int signal, pid_t pid, uid_t uid)
     agm_dump(&dump_info);
 }
 
+// FourSemi SPK MODE Start
+void ResourceManager::setFsmSpkMode()
+{
+    PAL_DBG(LOG_TAG, "Fsm setFsmSpkMode enter!");
+    switch(cur_audio_mode) {
+
+        case AUDIO_MODE_NORMAL:
+            fsm_spk_mode = FSM_SPK_MODE_MUSIC; // Music_Mode -> 1
+            break;
+        case AUDIO_MODE_RINGTONE:
+            fsm_spk_mode = FSM_SPK_MODE_RING; // Ring_Mode -> 3
+            break;
+        case AUDIO_MODE_IN_CALL:
+        case AUDIO_MODE_IN_COMMUNICATION:
+            fsm_spk_mode = FSM_SPK_MODE_VOICE; // Voice_Mode -> 2
+            break;
+        default:
+            fsm_spk_mode = FSM_SPK_MODE_MUSIC; // Music_Mode -> 1
+            break;
+    }
+
+    if(!isSpeakerProtectionEnabled)
+        fsm_spk_mode = FSM_SPK_MODE_BYPASS; // Bypass_Mode only for Factory ATA
+
+    PAL_DBG(LOG_TAG, "setFsmSpkMode -> %d", fsm_spk_mode);
+}
+// FourSemi SPK MODE End
+
 int32_t ResourceManager::updateMicOcclusionInfo(Stream *s, void *data)
 {
     PAL_DBG(LOG_TAG, "Enter %s", __func__);

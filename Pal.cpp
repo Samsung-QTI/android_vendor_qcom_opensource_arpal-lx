@@ -1435,3 +1435,23 @@ int32_t pal_gef_rw_param_acdb(uint32_t param_id __unused, void *param_payload,
 
     return status;
 }
+
+// FourSemi SPK MODE Start
+int32_t pal_set_audio_mode(int audio_mode)
+{
+    int status = 0;
+    std::shared_ptr<ResourceManager> rm = NULL;
+    rm = ResourceManager::getInstance();
+
+    PAL_DBG(LOG_TAG, "pal set audio mode: %d", audio_mode);
+    if (rm) {
+        rm->cur_audio_mode = audio_mode;
+    } else {
+        PAL_ERR(LOG_TAG, "Pal has not been initialized yet");
+        status = -EINVAL;
+    }
+    PAL_DBG(LOG_TAG, "Exit, status %d", status);
+
+    return status;
+}
+// FourSemi SPK MODE End

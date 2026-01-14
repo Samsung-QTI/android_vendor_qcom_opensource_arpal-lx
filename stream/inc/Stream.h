@@ -117,6 +117,9 @@ typedef enum {
 #define DEVICEPP_MUTE 45
 #define DEVICEPP_UNMUTE 46
 #define HANDSET_PROT_ENABLE 47
+// FourSemi SPK MODE Start
+#define FSM_SPK_MODE_ENABLE 48
+// FourSemi SPK MODE End
 
 /* This sleep is added to give time to kernel and
  * spf to recover from SSR so that audio-hal will

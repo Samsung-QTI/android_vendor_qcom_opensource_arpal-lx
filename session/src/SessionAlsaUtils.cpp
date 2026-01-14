@@ -468,6 +468,14 @@ int SessionAlsaUtils::open(Stream * streamHandle, std::shared_ptr<ResourceManage
 
         deviceCKV.clear();
 
+        // FourSemi SPK MODE Start
+        if ((be->first == PAL_DEVICE_OUT_SPEAKER) || (be->first == PAL_DEVICE_IN_SPEAKER_MIC)) {
+            PAL_INFO(LOG_TAG, "FSM SessionAlsaUtils:: open enter");
+            rmHandle->setFsmSpkMode();
+            status = builder->populateFsmCalKeyVector(streamHandle, deviceCKV, FSM_SPK_MODE_ENABLE);
+        }
+        // FourSemi SPK MODE End
+
         if (ResourceManager::isSpeakerProtectionEnabled) {
             PAL_DBG(LOG_TAG, "Speaker protection enabled");
             if (be->first == PAL_DEVICE_OUT_SPEAKER) {
@@ -2496,6 +2504,15 @@ int SessionAlsaUtils::setupSessionDevice(Stream* streamHandle, pal_stream_type_t
         PAL_ERR(LOG_TAG, "populateDevicePP Ckv failed %d", status);
         status = 0; /**< ignore device PP CKV failures */
     }
+
+    // FourSemi SPK MODE Start
+    if ((aifBackEndsToConnect[0].first == PAL_DEVICE_OUT_SPEAKER)
+        || (aifBackEndsToConnect[0].first == PAL_DEVICE_IN_SPEAKER_MIC)) {
+        PAL_INFO(LOG_TAG, "Fsm SessionAlsaUtils:: setupSessionDevice enter");
+        rmHandle->setFsmSpkMode();
+        status = builder->populateFsmCalKeyVector(streamHandle, devicePPCKV, FSM_SPK_MODE_ENABLE);
+    }
+    // FourSemi SPK MODE End
 
     if (streamDeviceKV.size() > 0 || devicePPCKV.size() > 0) {
         SessionAlsaUtils::getAgmMetaData(streamDeviceKV, devicePPCKV,

@@ -932,6 +932,12 @@ public:
                              std::vector<Stream*> &streamsToSwitch,
                              struct pal_device *streamDevAttr);
     static void sendCrashSignal(int signal, pid_t pid, uid_t uid);
+    // FourSemi SPK MODE Start
+    int cur_audio_mode;
+    uint32_t fsm_spk_mode = FSM_SPK_MODE_MUSIC;
+    void setFsmSpkMode();
+    int lux_screen_rotation = 0;
+    // FourSemi SPK MODE End
     bool isValidDeviceSwitchForStream(Stream *s, pal_device_id_t newDeviceId);
 };
 

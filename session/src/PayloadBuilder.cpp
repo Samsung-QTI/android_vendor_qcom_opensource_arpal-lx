@@ -3141,6 +3141,34 @@ exit:
     return status;
 }
 
+// FourSemi SPK MODE Start
+int PayloadBuilder::populateFsmCalKeyVector(Stream *s, std::vector <std::pair<int, int>> &ckv, int tag) {
+    int status = 0;
+    PAL_VERBOSE(LOG_TAG, "enter\n");
+    std::shared_ptr<ResourceManager> rm = ResourceManager::getInstance();
+
+    PAL_DBG(LOG_TAG, "Fsm populateFsmCalKeyVector enter");
+
+    switch (static_cast<uint32_t>(tag)) {
+        case TAG_STREAM_VOLUME:
+            break;
+        case TAG_DEVICE_PP_MBDRC:
+            break;
+        //case TAG_PROT_ENABLE:
+        //    break;
+        //case TAG_VI_ENABLE:
+        //    break;
+        case FSM_SPK_MODE_ENABLE:
+            PAL_INFO(LOG_TAG, "Fsm set SPK Mode %d", rm->fsm_spk_mode);
+            ckv.push_back(std::make_pair(FSM_SPK_MODE, rm->fsm_spk_mode));
+            break;
+        default:
+            break;
+    }
+    return status;
+}
+// FourSemi SPK MODE End
+
 int PayloadBuilder::populateCalKeyVector(Stream *s, std::vector <std::pair<int,int>> &ckv, int tag) {
     int status = 0, spkViMap, spkDevMap;
     PAL_VERBOSE(LOG_TAG,"enter \n");

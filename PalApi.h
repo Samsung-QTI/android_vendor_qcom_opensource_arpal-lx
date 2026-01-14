@@ -582,6 +582,10 @@ int32_t pal_gef_rw_param_acdb(uint32_t param_id, void *param_payload,
                       pal_stream_type_t pal_stream_type, uint32_t sample_rate,
                       uint32_t instance_id, uint32_t dir, bool is_play);
 
+// FourSemi SPK MODE Start
+int32_t pal_set_audio_mode(int audio_mode);
+// FourSemi SPK MODE End
+
 extern void  __gcov_flush();
 
 /**

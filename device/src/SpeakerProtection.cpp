@@ -117,6 +117,11 @@ bool SpeakerProtection::mDspCallbackRcvd;
 std::shared_ptr<Device> SpeakerFeedback::obj = nullptr;
 int SpeakerFeedback::numSpeaker;
 
+#ifdef PAL_SUPPORT_FS19XX
+static fsm_algo_calib_data_t fsmReValue;
+static fsm_r0_range_t fsm_range;
+#endif
+
 std::string getDefaultSpkrTempCtrl(uint8_t spkr_pos)
 {
     switch(spkr_pos)
@@ -2155,6 +2160,7 @@ SpeakerProtection::SpeakerProtection(struct pal_device *device,
         PAL_ERR(LOG_TAG,"hw mixer error %d", status);
     }
 
+#if !defined (PAL_SUPPORT_FS19XX)
     fp = fopen(PAL_SP_TEMP_PATH, "rb");
     if (fp) {
         PAL_DBG(LOG_TAG, "Cal File exists. Reading from it");
@@ -2166,6 +2172,64 @@ SpeakerProtection::SpeakerProtection(struct pal_device *device,
                             this);
         calThrdCreated = true;
     }
+#endif
+
+#ifdef PAL_SUPPORT_FS19XX
+    {
+        FILE *fp = NULL;
+        int data_len = 2;
+        int i, j;
+        int spkrCalCount = 0;
+
+        fp = fopen(FSM_RE_RANGE_PATH, "rb");
+        if (fp != NULL) {
+            for (i = 0; i < FSM_DEV_NUM; i++) {
+                j = fscanf(fp, "%lf %lf", &fsm_range.r0_min[i], &fsm_range.r0_max[i]);// 2 elements each line
+                if (j != data_len)
+                    PAL_ERR(LOG_TAG,"FourSemi get coef range failed");
+
+                PAL_ERR(LOG_TAG,"FourSemi dev[%d] range re25[%f-%f]", i, fsm_range.r0_min[i], fsm_range.r0_max[i]);
+            }
+            fclose(fp);
+        } else {
+            PAL_ERR(LOG_TAG,"FourSemi open path(%s) failed, use default range", FSM_RE_RANGE_PATH);
+            //TODO:customize part, Make modifications based on different projects
+            fsm_range.r0_min[0] = 5.6 * 4096; // 6.5 * (100% - 20%) * 4096
+            fsm_range.r0_max[0] = 8.4 * 4096; // 6.5 * (100% + 20%) * 4096
+            fsm_range.r0_min[1] = 5.6 * 4096; // 6.5 * (100% - 20%) * 4096
+            fsm_range.r0_max[1] = 8.4 * 4096; // 6.5 * (100% + 20%) * 4096
+            fsm_range.r0_min[2] = 5.6 * 4096; // 6.5 * (100% - 20%) * 4096
+            fsm_range.r0_max[2] = 8.4 * 4096; // 6.5 * (100% + 20%) * 4096
+            fsm_range.r0_min[3] = 5.6 * 4096; // 6.5 * (100% - 20%) * 4096
+            fsm_range.r0_max[3] = 8.4 * 4096; // 6.5 * (100% + 20%) * 4096
+        }
+
+        fp = fopen(FSM_RDC_BIN, "rb");
+        if (fp) {
+            PAL_INFO(LOG_TAG, "FourSemi Cal bin File exists. Reading from it");
+            for (i = 0; i < FSM_DEV_NUM; i++) {
+                fread((void *)&fsmReValue.calib_data[i].re25, sizeof(uint32_t), 1, fp);
+                PAL_INFO(LOG_TAG, "FourSemi read calibration data dev[%d]=%f", i, fsmReValue.calib_data[i].re25 / 4096.0);
+                //TODO:each device needs to be compared
+                if (fsmReValue.calib_data[i].re25 < fsm_range.r0_max[i] && fsmReValue.calib_data[i].re25 > fsm_range.r0_min[i])
+                    spkrCalCount++;
+            }
+            fclose(fp);
+        } else {
+            PAL_ERR(LOG_TAG,"FourSemi open file %s failed", FSM_RDC_BIN);
+        }
+        if (spkrCalCount != FSM_DEV_NUM) {
+            PAL_ERR(LOG_TAG, "FourSemi Calibration failed, set default value");
+            spkrCalState = SPKR_NOT_CALIBRATED;
+            //TODO:
+            fsmReValue.calib_data[0].re25 = 0;//use default value in param
+            fsmReValue.calib_data[1].re25 = 0;//use default value in param
+            fsmReValue.calib_data[2].re25 = 0;//use default value in param
+            fsmReValue.calib_data[3].re25 = 0;//use default value in param
+        }
+        fsmReValue.ndev = FSM_DEV_NUM;
+    }
+#endif
 
 error_exit:
     if (status != 0) {
@@ -3146,7 +3210,7 @@ int SpeakerProtection::viTxSetupThreadLoop()
             PAL_ERR(LOG_TAG, "Failed to obtain device KV for %d", device.id);
             goto exit;
         }
-
+#if !defined (PAL_SUPPORT_FS19XX)
         // Enable the VI module
         switch (numberOfChannels) {
             case 1 :
@@ -3165,6 +3229,7 @@ int SpeakerProtection::viTxSetupThreadLoop()
                 PAL_ERR(LOG_TAG, "Unsupported channel");
                 goto exit;
         }
+#endif
 
         SessionAlsaUtils::getAgmMetaData(keyVector, calVector,
                 (struct prop_data *)devicePropId, deviceMetaData);
@@ -3246,6 +3311,7 @@ int SpeakerProtection::viTxSetupThreadLoop()
 
         flags = PCM_IN;
 
+#if !defined (PAL_SUPPORT_FS19XX)
         //Setting the mode of VI module
         modeConfg.num_speakers = numberOfChannels;
         switch (rm->mSpkrProtModeValue.operationMode) {
@@ -3424,6 +3490,7 @@ int SpeakerProtection::viTxSetupThreadLoop()
                 goto free_fe;
             }
         }
+#endif
 
         txPcm = pcm_open(rm->getVirtualSndCard(), pcmDevIdTx.at(0), flags, &config);
         if (!txPcm) {
@@ -3527,6 +3594,7 @@ int32_t SpeakerProtection::spkrProtProcessingMode(bool flag)
     deviceMutex.lock();
 
     if (flag) {
+#if !defined (PAL_SUPPORT_FS19XX)
         if (spkrCalState == SPKR_CALIB_IN_PROGRESS) {
             // Close the Graphs
             cv.notify_all();
@@ -3537,6 +3605,8 @@ int32_t SpeakerProtection::spkrProtProcessingMode(bool flag)
             rxPcm = NULL;
             PAL_DBG(LOG_TAG, "Stopped calibration mode");
         }
+#endif
+
         numberOfRequest++;
         if (numberOfRequest > 1) {
             // R0T0 already set, we don't need to process the request
@@ -3563,6 +3633,8 @@ int32_t SpeakerProtection::spkrProtProcessingMode(bool flag)
             PAL_DBG(LOG_TAG, " Created vi tx thread :%s ", __func__);
             viTxSetupThrdCreated = true;
         }
+
+#if !defined (PAL_SUPPORT_FS19XX)
         rm = ResourceManager::getInstance();
         if (!rm) {
             PAL_ERR(LOG_TAG, "Failed to get resource manager instance");
@@ -3660,6 +3732,7 @@ int32_t SpeakerProtection::spkrProtProcessingMode(bool flag)
         if (ResourceManager::isCpsEnabled) {
             updateCpsCustomPayload(miid);
         }
+#endif
         goto exit;
     }
     else {
@@ -3812,7 +3885,9 @@ int SpeakerProtection::start()
 
     if (ResourceManager::isVIRecordStarted) {
         PAL_DBG(LOG_TAG, "record running so just update SP payload");
+#if !defined (PAL_SUPPORT_FS19XX)
         updateSPcustomPayload();
+#endif
     }
     else {
         if (ResourceManager::isSpeakerHandsetProtectionSeparate)
@@ -3842,6 +3917,141 @@ int SpeakerProtection::stop()
     return 0;
 }
 
+#ifdef PAL_SUPPORT_FS19XX
+void SpeakerProtection::getFsmCalibRe25(int device, calib_data_info_t *cali_re, int data_len)
+{
+    int ret = 0, i = 0;
+    uint32_t miid = 0;
+    uint8_t *payload = NULL;
+    uint32_t payload_size = 0;
+    uint32_t pad_bytes = 0;
+    std::string backendName;
+    struct mixer_ctl *ctl;
+    struct mixer_ctl *fsm_ctl;
+    std::ostringstream cntrlName;
+    char *pcmDeviceName = NULL;
+    const char *getParamControl = "getParam";
+    struct apm_module_param_data_t *header = NULL;
+
+    if (cali_re == NULL || data_len == 0) {
+        PAL_ERR(LOG_TAG, "FourSemi INTF invalid param");
+        goto exit;
+    }
+    PAL_INFO(LOG_TAG, "FourSemi get re25 enter, data_len:%d.", data_len);
+    pcmDeviceName = rm->getDeviceNameFromID(device);
+    if (pcmDeviceName) {
+        cntrlName<<pcmDeviceName<<" "<<getParamControl;
+    }
+    else {
+        PAL_ERR(LOG_TAG, "FourSemi: Unable to get Device name.");
+        goto exit;
+    }
+    PAL_INFO(LOG_TAG, "FourSemi: mixer control:%s", cntrlName.str().data());
+    ctl = mixer_get_ctl_by_name(virtMixer, cntrlName.str().data());
+    if (!ctl) {
+        PAL_ERR(LOG_TAG, "FourSemi: failed to get mixer control: %s.", cntrlName.str().data());
+        goto exit;
+    }
+
+    rm->getBackendName(PAL_DEVICE_OUT_SPEAKER, backendName);
+    if (!strlen(backendName.c_str())) {
+        PAL_ERR(LOG_TAG, "FourSemi: Failed to obtain speaker backend name.");
+        goto exit;
+    }
+    ret = SessionAlsaUtils::getModuleInstanceId(virtMixer, device,
+                        backendName.c_str(), MODULE_SP, &miid);
+    if (0 != ret) {
+        PAL_ERR(LOG_TAG, "FourSemi: Failed to get MODULE_SP tag info");
+        goto exit;
+    }
+    //fsm_ctl = mixer_get_ctl_by_name(hwMixer, "FSM_Scene");
+    //if (!fsm_ctl)
+    //   PAL_ERR(LOG_TAG, "FourSemi: Invalid fsm mixer control");
+    //ret = mixer_ctl_set_value(fsm_ctl, 0, 16);
+    if(ret < 0)
+        PAL_ERR(LOG_TAG, "FourSemi set calib scene failed");
+    payload_size = sizeof(struct apm_module_param_data_t) + data_len;
+    pad_bytes = FS_PADDING_ALIGN_8BYTE(payload_size);
+    payload = (uint8_t *)calloc(1, pad_bytes + payload_size);
+    if (payload == NULL) {
+        PAL_ERR(LOG_TAG, "FourSemi calloc memory for payload failed");
+        goto exit;
+    }
+
+    header = (struct apm_module_param_data_t *)payload;
+    header->module_instance_id = miid;
+    header->param_id = FSADSP_PARAM_ID_GET_CALIB_DATA;
+    header->param_size = payload_size - sizeof(struct apm_module_param_data_t);
+    header->error_code = 0;
+
+    ret = mixer_ctl_set_array(ctl, payload, pad_bytes + payload_size);
+    if (ret < 0) {
+        PAL_ERR(LOG_TAG, "FourSemi send payload failed");
+        goto exit;
+    }
+
+    memset(payload, 0, pad_bytes + payload_size);
+    ret = mixer_ctl_get_array(ctl, payload, pad_bytes + payload_size);
+    if (ret < 0) {
+        PAL_ERR(LOG_TAG, "FourSemi get payload failed");
+        goto exit;
+    }
+    for (i = 0; i < data_len; i++) {
+        PAL_DBG(LOG_TAG, "FourSemi payload[%d] = 0x%x", i, payload[i]);
+    }
+    memcpy(cali_re, payload + sizeof(apm_module_param_data_t), data_len);
+    //ret = mixer_ctl_set_value(fsm_ctl, 0, 0);
+    if(ret < 0) {
+       PAL_ERR(LOG_TAG, "FourSemi set music scene failed");
+    }
+exit:
+    if (payload) {
+        free(payload);
+        payload = NULL;
+    }
+
+    return;
+}
+
+void SpeakerProtection::setFsmRdcValue(int device, fsm_algo_calib_data_t *cali_re, int data_len)
+{
+    int ret = 0, i = 0;
+    uint32_t miid = 0;
+    uint8_t *payload = NULL;
+    uint32_t payload_size = 0;
+    uint32_t pad_bytes = 0;
+    std::string backendName;
+    struct apm_module_param_data_t *header = NULL;
+
+    if (cali_re == NULL || data_len == 0) {
+        PAL_ERR(LOG_TAG, "FourSemi INTF invalid param");
+        return;
+    }
+
+    PAL_DBG(LOG_TAG, "FourSemi set re25 enter, numberOfRequest:%d", numberOfRequest);
+    if (numberOfRequest > 1) {
+        PAL_DBG(LOG_TAG, "FourSemi: re25 already set, ignore");
+        return;
+    }
+    rm->getBackendName(PAL_DEVICE_OUT_SPEAKER, backendName);
+    if (!strlen(backendName.c_str())) {
+        PAL_ERR(LOG_TAG, "FourSemi: Failed to obtain speaker backend name.");
+        return;
+    }
+    ret = SessionAlsaUtils::getModuleInstanceId(virtMixer, device,
+                        backendName.c_str(), MODULE_SP, &miid);
+    if (0 != ret) {
+        PAL_ERR(LOG_TAG, "FourSemi: Failed to get MODULE_SP tag info");
+        return;
+    }
+
+    payload_size = sizeof(struct apm_module_param_data_t) + FS_ALIGN_4BYTE(data_len);
+    pad_bytes = FS_PADDING_ALIGN_8BYTE(payload_size);
+    payload = (uint8_t *)calloc(1, payload_size + pad_bytes);
+    if (payload == NULL) {
+        PAL_ERR(LOG_TAG, "FourSemi calloc memory for payload failed");
+        return;
+    }
 
 int32_t SpeakerProtection::setParameter(uint32_t param_id, void *param)
 {
@@ -4102,7 +4312,79 @@ int32_t SpeakerProtection::getParameter(uint32_t param_id, void **param)
     int32_t status = 0;
     switch(param_id) {
         case PAL_PARAM_ID_SP_GET_CAL:
+#ifdef PAL_SUPPORT_FS19XX
+        {
+            /****** data format *******
+             * data type: double
+             * param[0] = r0[0];
+             * param[1] = f0[0];
+             * param[2] = r0[1];
+             * param[3] = f0[1];
+             ****************************/
+            int i = 0, ret = 0, max_retry = 0;
+            FILE *fp = NULL;
+            double r0, f0;
+            double data[FSM_DEV_NUM * 2] = {0};
+            calib_data_info_t calib_data[FSM_DEV_NUM];
+            int calib_status = SPKR_CALIBRATED;
+            std::ostringstream result;
+
+            PAL_INFO(LOG_TAG, "get re25 enter, pcm_dev:%d.", g_pcm_dev);
+            getFsmCalibRe25(g_pcm_dev, calib_data, sizeof(calib_data_info_t) * FSM_DEV_NUM);
+            //parse data
+            for (i = 0; i < FSM_DEV_NUM; i++) {
+                PAL_DBG(LOG_TAG, "FourSemi Calib data re25[%d] = %d", i, calib_data[i].re25);
+                PAL_DBG(LOG_TAG, "FourSemi Calib data tempr[%d] = %d", i, calib_data[i].tempr);
+                PAL_DBG(LOG_TAG, "FourSemi Calib data f0[%d] = %d", i, calib_data[i].f0);
+                PAL_DBG(LOG_TAG, "FourSemi Calib data q[%d] = %d", i, calib_data[i].q);
+                r0 = calib_data[i].re25 / 4096.0;
+                f0 = calib_data[i].f0 / 256.0;
+                data[i * 2] = r0;
+                data[i * 2 + 1] = f0;
+                // *calib_result = r0; //calib_result++;
+                // *calib_result = f0; calib_result++;
+                PAL_INFO(LOG_TAG, "FourSemi Calib r0:%f f0:%f", data[i * 2], data[i * 2 + 1]);
+                //if (r0 > spk_range[i].r0_max || r0 < spk_range[i].r0_min || f0 > spk_range[i].f0_max || f0 < spk_range[i].f0_min) {
+                if (calib_data[i].re25 > fsm_range.r0_max[i] || calib_data[i].re25 < fsm_range.r0_min[i]) {
+                    PAL_ERR(LOG_TAG, "FourSemi Calib dev[%d] invalid r0:%f f0:%f", i, r0, f0);
+                    calib_status = SPKR_NOT_CALIBRATED;
+                }
+            }
+
+            //store calib data
+            if (calib_status == SPKR_CALIBRATED) {
+                fp = fopen(FSM_RDC_BIN, "rb+");
+                if (fp) {
+                    for (i = 0; i < FSM_DEV_NUM; i++) {
+                        max_retry = 5;
+                        while(max_retry) {
+                            ret = fwrite(&calib_data[i].re25, sizeof(calib_data[i].re25), 1, fp);
+                            if (ret != 1) {
+                                PAL_ERR(LOG_TAG, "write re25[%d]:%f to %s failed", i, calib_data[i].re25 / 4096.0, FSM_RDC_BIN);
+                                max_retry--;
+                                continue;
+                            } else {
+                                fsmReValue.calib_data[i].re25 = calib_data[i].re25;
+                                break;
+                            }
+                        }
+                    }
+                    fclose(fp);
+                    //package result
+                    result << "Foursemi calib";
+                    for (i = 0; i < FSM_DEV_NUM; i++)
+                        result << " R[" << i <<"]="<< data[i * 2] << " f0["<< i <<"]="<< data[i * 2 + 1];
+                    PAL_INFO(LOG_TAG, "Calibration return str: %s", result.str().c_str());
+                    memcpy((char *) (param), result.str().c_str(), result.str().length());
+                    status = result.str().length();
+                } else {
+                    PAL_ERR(LOG_TAG, "FourSemi Calib open %s to store data failed", FSM_RDC_BIN);
+                }
+            }
+        }
+#else
             status = getCalibrationData(param);
+#endif
         break;
         case PAL_PARAM_ID_SP_MODE:
             status = getFTMParameter(param);
@@ -4261,7 +4543,9 @@ int32_t SpeakerFeedback::start()
     ResourceManager::isVIRecordStarted = true;
     // Do the customPayload configuration for VI path and call the Device::start
     PAL_DBG(LOG_TAG," Feedback start\n");
+#if !defined (PAL_SUPPORT_FS19XX)
     updateVIcustomPayload();
+#endif
     Device::start();
 
     return 0;
