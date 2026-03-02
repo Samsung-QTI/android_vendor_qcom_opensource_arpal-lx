@@ -730,7 +730,7 @@ int32_t ResourceManager::updateMicOcclusionInfo(Stream *s, void *data)
     uint16_t occlusionState;
 
     mic_info = (struct event_id_mic_occlusion_status_info_t *)data;
-    occlusionState = mic_info->occlusion_state;
+    occlusionState = mic_info->status;
 
     auto it = micOcclusionInfoMap.find(s);
 
