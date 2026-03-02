@@ -257,6 +257,14 @@ enum {
     SPKR_BOTTOM,   /* Bottom Speaker */
 };
 
+/* FourSemi Speaker Protection */
+enum {
+    FSM_SPK_MODE_MUSIC  = 1,
+    FSM_SPK_MODE_VOICE  = 2,
+    FSM_SPK_MODE_RING   = 3,
+    FSM_SPK_MODE_BYPASS = 4,
+};
+
 typedef enum {
     GEF_PARAM_READ = 0,
     GEF_PARAM_WRITE,
@@ -1529,6 +1537,39 @@ typedef struct pal_buffer_config {
 
 #ifdef __cplusplus
 }  /* extern "C" */
+#endif
+
+/* Fallback values for newer CAF/SPF macros missing from kernel headers */
+#ifndef FSM_SPK_MODE
+#define FSM_SPK_MODE 10
+#endif
+
+#ifndef NUM_CHAN_1
+#define NUM_CHAN_1 1
+#endif
+
+#ifndef NUM_CHAN_2
+#define NUM_CHAN_2 2
+#endif
+
+#ifndef TAG_MODULE_MIC_OCCLUSION_DET
+#define TAG_MODULE_MIC_OCCLUSION_DET 0x0700108A // Fallback
+#endif
+
+#ifndef EVENT_ID_MIC_OCCLUSION_STATUS_INFO
+#define EVENT_ID_MIC_OCCLUSION_STATUS_INFO 0x080011C5
+#endif
+
+#ifndef VCPM_CAL_KEY_ID_NUM_CHANNELS
+#define VCPM_CAL_KEY_ID_NUM_CHANNELS 0x0B001015
+#endif
+
+// Fallback struct for mic occlusion
+#ifndef HAVE_MIC_OCCLUSION_STATUS_INFO_T
+#define HAVE_MIC_OCCLUSION_STATUS_INFO_T
+typedef struct event_id_mic_occlusion_status_info_t {
+    uint32_t status;
+} event_id_mic_occlusion_status_info_t;
 #endif
 
 #endif /*PAL_DEFS_H*/
