@@ -18,7 +18,7 @@ int MetadataParser::parseMetadata(uint8_t* metadata, size_t metadataSize,
     if (!metadata || metadataSize < std::min(START_METADATA_SIZE(), END_METADATA_SIZE())) {
         //TODO: may not work for multiple frames/buffer
         ALOGE("%s: Metadata payload smaller than expected, bytes 0x%zx, expected 0x%lx",
-               __func__, mdBytesRead, std::min(START_METADATA_SIZE(), END_METADATA_SIZE()));
+            __func__, mdBytesRead, (unsigned long)std::min(START_METADATA_SIZE(), END_METADATA_SIZE())); 
         return -EINVAL;
     }
 
@@ -50,7 +50,7 @@ int MetadataParser::parseMetadata(uint8_t* metadata, size_t metadataSize,
                 }
                 bufferInfo->frame_index = static_cast<uint64_t>((static_cast<uint64_t>(
                         startMetadata->buffer_index_msw) << 32) | startMetadata->buffer_index_lsw);
-                ALOGV("%s: startMetadata frame_index %lu", __func__, bufferInfo->frame_index);
+                ALOGV("%s: startMetadata frame_index %llu", __func__, (unsigned long long)bufferInfo->frame_index);
                 mdBytesRead += sizeof(module_cmn_md_buffer_start_t);
                 break;
             }
